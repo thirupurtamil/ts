@@ -1,0 +1,64 @@
+<html>
+<head>
+<h2>
+{{empname}} [ {{count}} ]</h2>
+{{greetings}}
+{{index_date}}
+{{ram}}
+{{nse_obj}}
+{{nifty_data}}
+{{get_rows as table}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Student List</h1>
+
+
+<table border="1">
+    <tr>
+        <th>STIRKEPRICE</th>
+        <th>TYPE</th>
+        <th>OPEN</th>
+        <th>HIGH</th>
+        <th>LOW</th>
+        <th>LAST</th>
+         
+ 
+         
+        
+    </tr>
+    
+    <tr>
+       <td>{{ get_rows}}</td>
+       <td>{{ student.identityNumber }}</td>
+       <td>{{student.name}}</td>
+        <td>{{student.address}}</td>
+        <td>{{ student.mobile }}</td>
+        <td>{{ student.file }}</td>
+       
+       
+        
+
+        <td>
+            
+        </td>
+    </tr>
+    
+</table>
+</body>
+
+</html>
+
+
+</head>  
+   
+</body>
+</html>
+
+
+
+</body>
