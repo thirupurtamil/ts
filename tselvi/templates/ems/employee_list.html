@@ -1,0 +1,68 @@
+{% extends 'ems/home.html' %}
+{% block body %}
+<link rel = stylesheet href = "//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" defer>
+  <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js" defer></script>
+<script>
+    $(document).ready( function () {
+    $('#myTable').DataTable();
+} );
+  </script>
+<div  class="container-fluid">
+    
+
+    
+        <h2 style="color:red;margin-top:4%">Employee List
+            <a href="{% url 'create_employee' %}"><button class="btn btn-primary" align="right" style="float:right">Create</button></a>
+        </h2>
+        <table class="table table-bordered" id="myTable">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>DOB</th>
+    <th>Date of joining</th>
+      <th>Department</th>
+      <th>Designation</th>
+    <th>City</th>
+    <th>State</th>
+    <th>Country</th>
+    <th>Zipcode</th>
+    <th>No of leave</th>
+    <th>Leave/Working</th>
+    <th>Status</th>
+    <th>Action</th>
+  </tr>
+  </thead>
+   <tbody>
+
+    {% for i in employee %}
+  <tr>
+
+    <td>{{i.name}}</td>
+    <td>{{i.dob}}</td>
+    <td>{{i.doj}}</td>
+      <td>{{i.department}}</td>
+      <td>{{i.post}}</td>
+      <td>{{i.city}}</td>
+      <td>{{i.state}}</td>
+      <td>{{i.country}}</td>
+      <td>{{i.zipcode}}</td>
+      <td>{{i.leave_count}}</td>
+      <td>{% if i.on_leave %}
+        <a href="{% url 'leave_status' i.id %}" onclick="return confirm('Are you sure, You are working today?')"><button class="btn btn-danger">Leave</button></a>
+          {% else %}
+          <a href="{% url 'leave_status' i.id %}"  onclick="return confirm('Are you sure, You are applying for leave?')"><button class="btn btn-success">Working</button></a>
+        {% endif %}</td>
+      <td>{% if i.active %}Active{% else %}Inactive{% endif %}</td>
+    <td><a href="{% url 'edit_employee' i.id %}" ><button class="btn btn-success">Edit</button></a>
+        <a href="{% url 'delete_employee' i.id %}" onclick="return confirm('Are you sure?')"><button class="btn btn-danger">delete</button></a>
+    </td>
+  </tr>
+
+    {% endfor %}
+    </tbody>
+
+</table>
+
+</div>
+
+{% endblock  %}

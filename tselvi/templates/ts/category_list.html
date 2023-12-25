@@ -1,0 +1,39 @@
+{% extends 'papa/base.html'%}
+
+
+
+{%block  title %}
+<title>shopping |kart</title>
+{%endblock title %}
+
+{% block content %}
+{% include 'papa/nav.html' %}
+<h> tamil</h>
+{{ category}}
+
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>name</th>
+        <th>dis</th>
+        <th>Date</th>
+        <th>Image</th>
+         
+        
+    </tr>
+  {% for category in object_list %}
+    <tr>
+       <td>{{ category.id}}</td>
+       <td>{{ category.name}}</td>
+         <td>{{ category.description}}</td>
+           <td>{{ category.created_at}}</td>
+            <td>{{ category.image}}</td>
+            
+      
+
+
+
+        {%endfor%}
+{%endblock content %}
+    
