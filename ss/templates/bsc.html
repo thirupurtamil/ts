@@ -1,0 +1,68 @@
+{% extends 'layout.html' %}
+{% block title %}NIFTY Option Premium (BS Model){% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2 class="text-center text-primary fw-bold">📊 NIFTY Option Premium Tracker</h2>
+
+  <div class="input-group mt-4 mb-3">
+    <input id="strike-input" type="number" class="form-control" placeholder="Enter Strike Price (e.g. 22200)">
+    <button class="btn btn-primary" onclick="loadData()">Fetch Premium</button>
+  </div>
+
+  <div id="info-box" class="alert alert-info d-none"></div>
+
+  <table id="result-table" class="table table-bordered table-striped text-center mt-3 d-none">
+    <thead class="table-dark">
+      <tr>
+        <th>Spot</th>
+        <th>Call (BS)</th>
+        <th>Put (BS)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+async function loadData() {
+  const strike = document.getElementById("strike-input").value;
+  if (!strike) return alert("Strike price enter பண்ணு bro 😅");
+
+  // ✅ Correct API endpoint
+  const res = await fetch(`/api/bsc/?strike=${strike}`);
+  const data = await res.json();
+
+  if (data.error) {
+    alert(data.error);
+    return;
+  }
+
+  const infoBox = document.getElementById("info-box");
+  infoBox.classList.remove("d-none");
+  infoBox.innerHTML = `
+    <b>Spot:</b> ${data.info.spot.toFixed(2)} |
+    <b>Expiry:</b> ${data.info.expiry} |
+    <b>Days:</b> ${data.info.days}<br>
+    <b>IV Call:</b> ${(data.info.iv_call * 100).toFixed(2)}% |
+    <b>IV Put:</b> ${(data.info.iv_put * 100).toFixed(2)}%<br>
+    <b>Market Call:</b> ₹${data.info.mkt_call} |
+    <b>Market Put:</b> ₹${data.info.mkt_put}
+  `;
+
+  const tbody = document.querySelector("#result-table tbody");
+  tbody.innerHTML = "";
+  data.data.forEach(row => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${row["Spot"]}</td>
+        <td>${row["Call (BS)"]}</td>
+        <td>${row["Put (BS)"]}</td>
+      </tr>`;
+  });
+
+  document.getElementById("result-table").classList.remove("d-none");
+}
+</script>
+
+{% endblock %}

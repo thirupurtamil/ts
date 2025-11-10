@@ -1,0 +1,78 @@
+{% extends 'layout.html' %}
+{% block title %}LTP Similarity{% endblock %}
+
+{% block content %}
+<h2 class="text-center mt-3 fw-bold text-dark">📊 NIFTY LTP Similarity Tracker</h2>
+
+<div class="text-center mt-3">
+  <button class="btn btn-outline-primary btn-sm" onclick="loadLtpData()">🔄 Refresh</button>
+</div>
+
+<div id="ltp-container" class="text-center text-light mt-4">⏳ Loading...</div>
+
+<script>
+async function loadLtpData() {
+  try {
+    const response = await fetch("/api/ltp_similarity/");
+    const data = await response.json();
+    const container = document.getElementById("ltp-container");
+
+    if (data.message) {
+      container.innerHTML = `<div class='alert alert-warning'>${data.message}</div>`;
+      return;
+    }
+
+    let html = "";
+
+    // 🔥 Closest Match
+    if (data.closest && Object.keys(data.closest).length) {
+      const c = data.closest;
+      html += `
+      <div class="card mx-auto mt-3 shadow" style="max-width:520px;">
+        <div class="card-body text-center">
+          <h5 class="fw-bold text-primary">🔥 Closest Match (Diff ₹${c.Diff})</h5>
+          <div class="mt-2">
+            <span class="badge bg-warning text-dark">Strike: ${c.Strike}</span>
+            <span class="badge bg-success">Call: ${c.Call}</span>
+            <span class="badge bg-danger">Put: ${c.Put}</span>
+          </div>
+          <p class="mt-3"><strong>💰 Added Premium:</strong> ${c.Added_Premium}</p>
+          <p>R1: ${c.R1} | R2: ${c.R2} | S1: ${c.S1} | S2: ${c.S2}</p>
+        </div>
+      </div>`;
+    }
+
+    // ✅ Matches
+    if (data.matches && data.matches.length) {
+      html += `
+      <h4 class="mt-4 text-light fw-semibold">✅ Perfect Match Strikes (Diff ≤ 1)</h4>
+      <div class="table-responsive mt-3">
+        <table class="table table-bordered text-center table-sm table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>Strike</th><th>Call</th><th>Put</th><th>Total</th><th>Diff</th>
+            </tr>
+          </thead>
+          <tbody>
+          ${data.matches.map(m => `
+            <tr>
+              <td>${m.Strike}</td>
+              <td>${m.Call}</td>
+              <td>${m.Put}</td>
+              <td>${m.Total}</td>
+              <td>${m.Diff}</td>
+            </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>`;
+    }
+
+    container.innerHTML = html || "<div class='text-warning mt-3'>⚠️ No data found.</div>";
+  } catch (err) {
+    document.getElementById("ltp-container").innerHTML = `<div class='alert alert-danger'>🚨 Error loading data!</div>`;
+  }
+}
+
+loadLtpData();
+</script>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+{% block title %}📅 NIFTY Weekly Range{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📊 NIFTY Weekly High–Low–Range</h2>
+        <button class="btn btn-success" onclick="loadWeeklyData()">🔄 Refresh</button>
+    </div>
+
+    <div id="loading" style="display:none;">
+        <p>⏳ Loading weekly data...</p>
+    </div>
+
+    <div style="overflow-x:auto;">
+        <table id="weeklyTable" class="table table-bordered table-hover text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>Week</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Weekly High</th>
+                    <th>Weekly Low</th>
+                    <th>Range (High - Low)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.table th, .table td {
+  padding: 8px;
+  border: 1px solid #ddd;
+}
+.table-dark th {
+  background-color: #222;
+  color: #fff;
+}
+.positive { color: #16a34a; font-weight: 600; } /* green */
+.negative { color: #dc2626; font-weight: 600; } /* red */
+</style>
+
+<script>
+async function loadWeeklyData() {
+    const tableBody = document.querySelector('#weeklyTable tbody');
+    const loading = document.getElementById('loading');
+    tableBody.innerHTML = '';
+    loading.style.display = 'block';
+
+    try {
+        const res = await fetch('/api/nifty/weekly/?_=' + Date.now());
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+
+        const data = await res.json();
+        if (!Array.isArray(data)) {
+            throw new Error('Invalid data format');
+        }
+
+        data.forEach((row) => {
+            const tr = document.createElement('tr');
+
+            const rangeColor = row.weekly_range > 0 ? 'positive' : 'negative';
+
+            tr.innerHTML = `
+                <td>${row.week}</td>
+                <td>${row.start_date}</td>
+                <td>${row.end_date}</td>
+                <td class="positive">${row.weekly_high.toFixed(2)}</td>
+                <td class="negative">${row.weekly_low.toFixed(2)}</td>
+                <td class="${rangeColor}">${row.weekly_range.toFixed(2)}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+
+    } catch (err) {
+        console.error('❌ Error loading weekly data:', err);
+        tableBody.innerHTML = `<tr><td colspan="6" style="color:red;">Error loading data. Check console.</td></tr>`;
+    } finally {
+        loading.style.display = 'none';
+    }
+}
+
+window.addEventListener('load', loadWeeklyData);
+</script>
+{% endblock %}

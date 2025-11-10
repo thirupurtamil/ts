@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+
+{% block title %}Black-Scholes Calculator{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">📊 Black-Scholes Option Calculator</h2>
+
+    <div class="row mb-3">
+        <div class="col"><input type="number" id="spot" class="form-control" placeholder="Spot Price"></div>
+        <div class="col"><input type="number" id="strike" class="form-control" placeholder="Strike Price"></div>
+        <div class="col"><input type="number" id="days" class="form-control" placeholder="Days to Expiry"></div>
+    </div>
+    <div class="row mb-3">
+        <div class="col"><input type="number" id="iv" class="form-control" placeholder="Implied Volatility (%)"></div>
+        <div class="col"><input type="number" id="r" class="form-control" placeholder="Risk-free Rate (%)"></div>
+        <div class="col">
+            <select id="type" class="form-select">
+                <option value="call">Call</option>
+                <option value="put">Put</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="text-center mb-3">
+        <button id="calcBtn" class="refresh-btn">Calculate Premium</button>
+    </div>
+
+    <div class="text-center">
+        <h4 id="result">Premium: ₹0.00</h4>
+    </div>
+</div>
+
+<script>
+document.getElementById('calcBtn').addEventListener('click', async () => {
+    const spot = document.getElementById('spot').value;
+    const strike = document.getElementById('strike').value;
+    const days = document.getElementById('days').value;
+    const iv = document.getElementById('iv').value;
+    const r = document.getElementById('r').value;
+    const type = document.getElementById('type').value;
+
+    const url = `/api/bs/?spot=${spot}&strike=${strike}&days=${days}&iv=${iv}&r=${r}&type=${type}`;
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if(data.error){
+            document.getElementById('result').innerText = "Error: " + data.error;
+        } else {
+            document.getElementById('result').innerText = `Premium: ₹${data.premium}`;
+        }
+    } catch(err){
+        document.getElementById('result').innerText = "Fetch Error: " + err;
+    }
+});
+</script>
+{% endblock %}

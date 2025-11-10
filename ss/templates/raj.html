@@ -1,0 +1,133 @@
+{% extends "layout.html" %}
+
+{% block title %}Nifty 50 OHLC Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats">
+    <div class="stat-card">
+        <div class="stat-label">Prev Close</div>
+        <div class="stat-value" id="previousClose">--</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Open</div>
+        <div class="stat-value" id="open">--</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Day High</div>
+        <div class="stat-value" id="dayHigh">--</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Day Low</div>
+        <div class="stat-value" id="dayLow">--</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Last</div>
+        <div class="stat-value" id="lastPrice">--</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Change</div>
+        <div class="stat-value" id="Change">--</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">High</div>
+        <div class="stat-value" id="High">--</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Low</div>
+        <div class="stat-value" id="Low">--</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Gap</div>
+        <div class="stat-value" id="Gap">--</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Range</div>
+        <div class="stat-value" id="Range">--</div>
+    </div>
+</div>
+
+<p class="record-count">Total Records: {{ name }}</p>
+<button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+
+<script>
+function formatNumber(v) {
+  if (v === null || v === undefined || isNaN(v)) return '--';
+  return parseFloat(v).toFixed(2);
+}
+
+function setValue(id, val, colorize=false) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  if (val === null || val === undefined || isNaN(val)) {
+    el.innerText = '--';
+    el.className = 'stat-value';
+    return;
+  }
+
+  const num = Number(val);
+  el.innerText = num.toFixed(2);
+
+  // Apply color only if specified
+  if (colorize) {
+    el.className = 'stat-value ' + (num > 0 ? 'positive' : num < 0 ? 'negative' : '');
+  } else {
+    el.className = 'stat-value';
+  }
+}
+
+async function loadData() {
+  try {
+    const res = await fetch('/api/nifty/?_=' + Date.now());
+    if (!res.ok) throw new Error('Status ' + res.status);
+    const d = await res.json();
+
+    const prev = d.previousClose ?? d.prevClose ?? null;
+    const open = d.open ?? null;
+    const dh = d.dayHigh ?? d.High ?? null;
+    const dl = d.dayLow ?? d.Low ?? null;
+    const last = d.lastPrice ?? null;
+    const change = d.Change ?? (last && prev ? last - prev : null);
+    const high = d.High ?? dh;
+    const low = d.Low ?? dl;
+    const gap = d.Gap ?? (open && prev ? open - prev : null);
+    const range = d.Range ?? (dh && dl ? dh - dl : null);
+
+    // normal (no color)
+    setValue('previousClose', prev);
+    setValue('open', open);
+    setValue('dayHigh', dh);
+    setValue('dayLow', dl);
+    setValue('lastPrice', last);
+    setValue('High', high);
+    setValue('Low', low);
+    setValue('Range', range);
+
+    // only these two colorized
+    setValue('Change', change, true);
+    setValue('Gap', gap, true);
+
+  } catch (err) {
+    console.error('Error fetching /api/nifty/:', err);
+    alert('Error fetching Nifty data. Check console.');
+  }
+}
+
+window.addEventListener('load', loadData);
+</script>
+
+<style>
+.positive { color: #10b981; font-weight: 600; } /* green */
+.negative { color: #ef4444; font-weight: 600; } /* red */
+</style>
+
+{% endblock %}
